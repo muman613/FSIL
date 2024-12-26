@@ -16,6 +16,10 @@ FileEntryContainer::FileEntryContainer(std::initializer_list<FileEntry> entries)
     }
 }
 
+FileEntryPtr &FileEntryContainer::operator[](int index) {
+    return fileEntries[index];
+}
+
 FileEntry &FileEntryContainer::operator[](size_t index) const {
     return *fileEntries[index].get();
 }
@@ -40,4 +44,10 @@ void FileEntryContainer::append(const std::filesystem::path& path) {
 
 void FileEntryContainer::append(const FileEntry &entry) {
     fileEntries.emplace_back(FileEntry::newEntry(entry.getPath()));
+}
+
+void FileEntryContainer::sortFileEntriesAlphabetically() {
+    std::sort(fileEntries.begin(), fileEntries.end(), [](const FileEntryPtr& a, const FileEntryPtr& b) {
+        return a->getPath().string() < b->getPath().string();
+    });
 }

@@ -44,9 +44,9 @@ BOOST_AUTO_TEST_CASE(ConstructorWithInitializerList) {
     BOOST_TEST(container.size() == 3);
 
     // Verify paths
-    BOOST_TEST(container[0].getPath() == testFilePaths[0]);
-    BOOST_TEST(container[1].getPath() == testFilePaths[1]);
-    BOOST_TEST(container[2].getPath() == testFilePaths[2]);
+    BOOST_TEST(container[0]->getPath() == testFilePaths[0]);
+    BOOST_TEST(container[1]->getPath() == testFilePaths[1]);
+    BOOST_TEST(container[2]->getPath() == testFilePaths[2]);
 }
 
 BOOST_AUTO_TEST_CASE(AppendEntry) {
@@ -60,8 +60,8 @@ BOOST_AUTO_TEST_CASE(AppendEntry) {
     BOOST_TEST(container.size() == 2);
 
     // Verify paths
-    BOOST_TEST(container[0].getPath() == testFilePaths[0]);
-    BOOST_TEST(container[1].getPath() == testFilePaths[1]);
+    BOOST_TEST(container[0]->getPath() == testFilePaths[0]);
+    BOOST_TEST(container[1]->getPath() == testFilePaths[1]);
 }
 
 BOOST_AUTO_TEST_CASE(AppendPath) {
@@ -75,8 +75,8 @@ BOOST_AUTO_TEST_CASE(AppendPath) {
     BOOST_TEST(container.size() == 2);
 
     // Verify paths
-    BOOST_TEST(container[0].getPath() == testFilePaths[0]);
-    BOOST_TEST(container[1].getPath() == testFilePaths[2]);
+    BOOST_TEST(container[0]->getPath() == testFilePaths[0]);
+    BOOST_TEST(container[1]->getPath() == testFilePaths[2]);
 }
 
 BOOST_AUTO_TEST_CASE(OperatorAccess) {
@@ -86,8 +86,8 @@ BOOST_AUTO_TEST_CASE(OperatorAccess) {
     });
 
     // Verify operator[] functionality
-    BOOST_TEST(container[0].getPath() == testFilePaths[0]);
-    BOOST_TEST(container[1].getPath() == testFilePaths[1]);
+    BOOST_TEST(container[0]->getPath() == testFilePaths[0]);
+    BOOST_TEST(container[1]->getPath() == testFilePaths[1]);
 }
 
 BOOST_AUTO_TEST_CASE(ForEach) {
@@ -120,8 +120,8 @@ BOOST_AUTO_TEST_CASE(MoveConstructor) {
 
     // Verify moved container
     BOOST_TEST(moved.size() == 2);
-    BOOST_TEST(moved[0].getPath() == testFilePaths[0]);
-    BOOST_TEST(moved[1].getPath() == testFilePaths[1]);
+    BOOST_TEST(moved[0]->getPath() == testFilePaths[0]);
+    BOOST_TEST(moved[1]->getPath() == testFilePaths[1]);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

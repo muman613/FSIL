@@ -32,6 +32,12 @@ public:
     [[nodiscard]] std::filesystem::path getName() const;
     [[nodiscard]] std::filesystem::path getExtension() const;
 
+    [[nodiscard]] std::filesystem::perms getPermissions() const;
+    [[nodiscard]] std::filesystem::file_time_type getCreationTime() const;
+    [[nodiscard]] std::filesystem::file_time_type getLastAccessTime() const;
+
+    [[nodiscard]] static std::string fileTimeToString(const std::filesystem::file_time_type& time);
+
     [[nodiscard]] std::string getContent() const;
     [[nodiscard]] std::vector<std::string> getLines() const;
 
@@ -39,6 +45,13 @@ public:
 
 private:
     std::filesystem::path filePath;
+
+#ifdef _WIN32
+    [[nodiscard]] std::filesystem::file_time_type getWindowsCreationTime() const;
+#else
+    [[nodiscard]] std::filesystem::file_time_type getPOSIXCreationTime() const;
+#endif
+
 };
 
 

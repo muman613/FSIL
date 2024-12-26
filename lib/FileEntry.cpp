@@ -8,6 +8,13 @@
 #include <exception>
 #include <fstream>
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <sys/stat.h>
+#endif
+
+
 FileEntry::FileEntry(std::filesystem::path path) : filePath(std::move(path)) {
 
 }
@@ -84,6 +91,98 @@ std::vector<std::string> FileEntry::getLines() const {
 
     return lines;
 }
+
+
+std::filesystem::perms FileEntry::getPermissions() const {
+    if (exists()) {
+        return std::filesystem::status(filePath).permissions();
+    }
+    throw std::runtime_error("File does not exist");
+}
+
+std::filesystem::file_time_type FileEntry::getCreationTime() const {
+#ifdef _WIN32
+    return getWindowsCreationTime();
+#else
+    return getPOSIXCreationTime();
+#endif
+}
+
+std::filesystem::file_time_type FileEntry::getLastAccessTime() const {
+#ifdef _WIN32
+    HANDLE fileHandle = CreateFile(filePath.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (fileHandle == INVALID_HANDLE_VALUE) {
+        throw std::runtime_error("Unable to retrieve access time on Windows");
+    }
+
+    FILETIME lastAccessTime;
+    if (!GetFileTime(fileHandle, nullptr, &lastAccessTime, nullptr)) {
+        CloseHandle(fileHandle);
+        throw std::runtime_error("Unable to retrieve access time on Windows");
+    }
+
+    CloseHandle(fileHandle);
+
+    auto duration = std::chrono::nanoseconds((static_cast<uint64_t>(lastAccessTime.dwHighDateTime) << 32) | lastAccessTime.dwLowDateTime);
+    return std::filesystem::file_time_type(std::chrono::duration_cast<std::filesystem::file_time_type::duration>(duration));
+#else
+    struct stat fileStat;
+    if (stat(filePath.c_str(), &fileStat) != 0) {
+        throw std::runtime_error("Unable to retrieve access time on POSIX");
+    }
+
+    auto timePoint = std::chrono::system_clock::from_time_t(fileStat.st_atime);
+    auto duration = timePoint.time_since_epoch();
+    return std::filesystem::file_time_type(std::chrono::duration_cast<std::filesystem::file_time_type::duration>(duration));
+#endif
+}
+
+
+std::string FileEntry::fileTimeToString(const std::filesystem::file_time_type& time) {
+    // Convert std::filesystem::file_time_type to system_clock::time_point
+    auto systemTimePoint = std::chrono::system_clock::now() +
+                           (time - std::filesystem::file_time_type::clock::now());
+
+    // Convert to time_t for formatting
+    auto systemTime = std::chrono::system_clock::to_time_t(systemTimePoint);
+
+    // Format the time to a readable string
+    std::ostringstream ss;
+    ss << std::put_time(std::localtime(&systemTime), "%Y-%m-%d %H:%M:%S");
+    return ss.str();
+}
+
+#ifdef _WIN32
+std::filesystem::file_time_type FileEntry::getWindowsCreationTime() const {
+    HANDLE fileHandle = CreateFile(filePath.c_str(), GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+    if (fileHandle == INVALID_HANDLE_VALUE) {
+        throw std::runtime_error("Unable to retrieve creation time on Windows");
+    }
+
+    FILETIME creationTime;
+    if (!GetFileTime(fileHandle, &creationTime, nullptr, nullptr)) {
+        CloseHandle(fileHandle);
+        throw std::runtime_error("Unable to retrieve creation time on Windows");
+    }
+
+    CloseHandle(fileHandle);
+
+    auto duration = std::chrono::nanoseconds((static_cast<uint64_t>(creationTime.dwHighDateTime) << 32) | creationTime.dwLowDateTime);
+    return std::filesystem::file_time_type(std::chrono::duration_cast<std::filesystem::file_time_type::duration>(duration));
+}
+#else
+std::filesystem::file_time_type FileEntry::getPOSIXCreationTime() const {
+    struct stat fileStat{};
+    if (stat(filePath.c_str(), &fileStat) != 0) {
+        throw std::runtime_error("Unable to retrieve creation time on POSIX");
+    }
+
+    auto timePoint = std::chrono::system_clock::from_time_t(fileStat.st_ctime);
+    auto duration = timePoint.time_since_epoch();
+    return std::filesystem::file_time_type(std::chrono::duration_cast<std::filesystem::file_time_type::duration>(duration));
+}
+
+#endif
 
 FileEntryPtr FileEntry::newEntry(const std::filesystem::path &path) {
     return std::make_unique<FileEntry>(path);

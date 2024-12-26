@@ -105,4 +105,21 @@ BOOST_FIXTURE_TEST_CASE(ScanWithCustomFilter, TestFixture) {
     BOOST_TEST(entries[1]->getPath().filename().string() == "subfile2.log");
 }
 
+BOOST_FIXTURE_TEST_CASE(ScanWithFileEntryContainer, TestFixture) {
+    FileScanner& scanner = FileScanner::getInstance();
+    FileEntryContainer entries;
+
+    // Scan with a custom filter to match only .log files
+    scanner.scan(testDataPath, entries, [](const fs::path& path) {
+        return path.extension() == ".log";
+    }, true);
+
+    // Sort entries alphabetically
+    entries.sortFileEntriesAlphabetically();
+
+    BOOST_TEST(entries.size() == 2);
+    BOOST_TEST(entries[0]->getPath().filename().string() == "file2.log");
+    BOOST_TEST(entries[1]->getPath().filename().string() == "subfile2.log");
+}
+
 BOOST_AUTO_TEST_SUITE_END()

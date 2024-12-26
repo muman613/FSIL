@@ -15,10 +15,14 @@ public:
      FileEntryContainer(FileEntryContainer&& other) noexcept ;
      FileEntryContainer(std::initializer_list<FileEntry> entries);
 //
+     FileEntryPtr &operator[](int index);
+
      void append(const FileEntry& entry);
      void append(const std::filesystem::path& path);
      FileEntry& operator[](std::size_t index) const;
      size_t size() const;
+
+     void sortFileEntriesAlphabetically();
 
      bool foreach(const std::function<bool(const FileEntry&)>& callback) const;
 //
