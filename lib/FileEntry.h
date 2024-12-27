@@ -28,11 +28,12 @@ public:
 
     [[nodiscard]] uintmax_t getSize() const;
 
-    [[nodiscard]] std::filesystem::file_time_type getTime() const;
     [[nodiscard]] std::filesystem::path getName() const;
     [[nodiscard]] std::filesystem::path getExtension() const;
 
     [[nodiscard]] std::filesystem::perms getPermissions() const;
+    [[nodiscard]] std::filesystem::file_type getType() const;
+    [[nodiscard]] std::filesystem::file_time_type getModificationTime() const;
     [[nodiscard]] std::filesystem::file_time_type getCreationTime() const;
     [[nodiscard]] std::filesystem::file_time_type getLastAccessTime() const;
 
@@ -48,8 +49,10 @@ private:
 
 #ifdef _WIN32
     [[nodiscard]] std::filesystem::file_time_type getWindowsCreationTime() const;
+    [[nodiscard]] std::filesystem::file_time_type getWindowsCreationTime() const;
 #else
     [[nodiscard]] std::filesystem::file_time_type getPOSIXCreationTime() const;
+    [[nodiscard]] std::filesystem::file_time_type getPOSIXAccessTime() const;
 #endif
 
 };

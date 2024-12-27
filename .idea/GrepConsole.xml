@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="GrepConsole">
+    <option name="tailHistory">
+      <TailHistory>
+        <option name="items">
+          <set>
+            <TailItem>
+              <option name="encoding" value="UTF-8" />
+              <option name="path" value="$PROJECT_DIR$/main.cpp" />
+            </TailItem>
+            <TailItem>
+              <option name="path" value="$PROJECT_DIR$/test/FileEntryContainerTest.cpp" />
+            </TailItem>
+          </set>
+        </option>
+      </TailHistory>
+    </option>
+  </component>
+</project>

@@ -101,6 +101,7 @@ BOOST_AUTO_TEST_CASE(ForEach) {
 
     // Use foreach to count entries
     container.foreach([&count](const FileEntry& entry) {
+        BOOST_TEST(entry.exists());
         BOOST_TEST(fs::exists(entry.getPath()));
         ++count;
         return true;
@@ -122,6 +123,9 @@ BOOST_AUTO_TEST_CASE(MoveConstructor) {
     BOOST_TEST(moved.size() == 2);
     BOOST_TEST(moved[0]->getPath() == testFilePaths[0]);
     BOOST_TEST(moved[1]->getPath() == testFilePaths[1]);
+    BOOST_TEST(original.size() == 0);
 }
+
+//  TODO: Do this
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -38,7 +38,7 @@ uintmax_t FileEntry::getSize() const {
     throw std::runtime_error("File does not exist");
 }
 
-std::filesystem::file_time_type FileEntry::getTime() const {
+std::filesystem::file_time_type FileEntry::getModificationTime() const {
     if (std::filesystem::exists(filePath)) {
         return std::filesystem::last_write_time(filePath);
     }
@@ -92,10 +92,16 @@ std::vector<std::string> FileEntry::getLines() const {
     return lines;
 }
 
-
 std::filesystem::perms FileEntry::getPermissions() const {
     if (exists()) {
         return std::filesystem::status(filePath).permissions();
+    }
+    throw std::runtime_error("File does not exist");
+}
+
+std::filesystem::file_type FileEntry::getType() const {
+    if (exists()) {
+        return std::filesystem::status(filePath).type();
     }
     throw std::runtime_error("File does not exist");
 }
@@ -126,14 +132,15 @@ std::filesystem::file_time_type FileEntry::getLastAccessTime() const {
     auto duration = std::chrono::nanoseconds((static_cast<uint64_t>(lastAccessTime.dwHighDateTime) << 32) | lastAccessTime.dwLowDateTime);
     return std::filesystem::file_time_type(std::chrono::duration_cast<std::filesystem::file_time_type::duration>(duration));
 #else
-    struct stat fileStat;
-    if (stat(filePath.c_str(), &fileStat) != 0) {
-        throw std::runtime_error("Unable to retrieve access time on POSIX");
-    }
-
-    auto timePoint = std::chrono::system_clock::from_time_t(fileStat.st_atime);
-    auto duration = timePoint.time_since_epoch();
-    return std::filesystem::file_time_type(std::chrono::duration_cast<std::filesystem::file_time_type::duration>(duration));
+    return getPOSIXAccessTime();
+    // struct stat fileStat;
+    // if (stat(filePath.c_str(), &fileStat) != 0) {
+    //     throw std::runtime_error("Unable to retrieve access time on POSIX");
+    // }
+    //
+    // auto timePoint = std::chrono::system_clock::from_time_t(fileStat.st_atime);
+    // auto duration = timePoint.time_since_epoch();
+    // return std::filesystem::file_time_type(std::chrono::duration_cast<std::filesystem::file_time_type::duration>(duration));
 #endif
 }
 
@@ -170,6 +177,11 @@ std::filesystem::file_time_type FileEntry::getWindowsCreationTime() const {
     auto duration = std::chrono::nanoseconds((static_cast<uint64_t>(creationTime.dwHighDateTime) << 32) | creationTime.dwLowDateTime);
     return std::filesystem::file_time_type(std::chrono::duration_cast<std::filesystem::file_time_type::duration>(duration));
 }
+
+std::filesystem::file_time_type FileEntry::getWindowsAccessTime() const {
+    return {};
+}
+
 #else
 std::filesystem::file_time_type FileEntry::getPOSIXCreationTime() const {
     struct stat fileStat{};
@@ -178,6 +190,17 @@ std::filesystem::file_time_type FileEntry::getPOSIXCreationTime() const {
     }
 
     auto timePoint = std::chrono::system_clock::from_time_t(fileStat.st_ctime);
+    auto duration = timePoint.time_since_epoch();
+    return std::filesystem::file_time_type(std::chrono::duration_cast<std::filesystem::file_time_type::duration>(duration));
+}
+
+std::filesystem::file_time_type FileEntry::getPOSIXAccessTime() const {
+    struct stat fileStat{};
+    if (stat(filePath.c_str(), &fileStat) != 0) {
+        throw std::runtime_error("Unable to retrieve creation time on POSIX");
+    }
+
+    auto timePoint = std::chrono::system_clock::from_time_t(fileStat.st_atime);
     auto duration = timePoint.time_since_epoch();
     return std::filesystem::file_time_type(std::chrono::duration_cast<std::filesystem::file_time_type::duration>(duration));
 }

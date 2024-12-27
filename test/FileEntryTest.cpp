@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE(FileTimeRetrieval) {
     TempFile tempFile("This is a test file.");
     FileEntry fileEntry(tempFile.getPath());
 
-    auto time = fileEntry.getTime(); // Capture the return value to respect [[nodiscard]]
+    auto time = fileEntry.getModificationTime(); // Capture the return value to respect [[nodiscard]]
     BOOST_CHECK_NO_THROW(time);
 }
 
